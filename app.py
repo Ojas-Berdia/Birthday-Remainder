@@ -1,47 +1,75 @@
 import datetime
 
+
 def add_birthday():
     name = input("Enter friend's name: ")
     birthday = input("Enter friend's birthday (YYYY-MM-DD): ")
     with open("birthdays.txt", "a") as file:
         file.write(name + "," + birthday + "\n")
 
-def check_birthdays():
-    today = datetime.date.today()
+
+def delete_birthday():
+    name_to_delete = input("Enter the name of the friend whose birthday you want to delete: ")
     with open("birthdays.txt", "r") as file:
+        lines = file.readlines()
+    with open("birthdays.txt", "w") as file:
+        for line in lines:
+            name, _ = line.strip().split(",")
+            if name != name_to_delete:
+                file.write(line)
+    print(f"{name_to_delete}'s birthday has been deleted.")
+
+
+def edit_birthday():
+    name_to_edit = input("Enter the name of the friend whose birthday you want to edit: ")
+    new_name = input("Enter the new name (leave blank to keep the same): ")
+    new_birthday = input("Enter the new birthday (YYYY-MM-DD) (leave blank to keep the same): ")
+    with open("birthdays.txt", "r") as file:
+        lines = file.readlines()
+    with open("birthdays.txt", "w") as file:
+        for line in lines:
+            name, birthday = line.strip().split(",")
+            if name == name_to_edit:
+                if new_name:
+                    name = new_name
+                if new_birthday:
+                    birthday = new_birthday
+                file.write(name + "," + birthday + "\n")
+            else:
+                file.write(line)
+    print(f"{name_to_edit}'s birthday has been updated.")
+
+
+def display_birthdays():
+    with open("birthdays.txt", "r") as file:
+        print("\nBirthdays:")
         for line in file:
             name, birthday = line.strip().split(",")
-            birthday_date = datetime.datetime.strptime(birthday, "%Y-%m-%d").date()
-            if birthday_date.month == today.month and birthday_date.day >= today.day:
-                days_until_birthday = (birthday_date - today).days
-                print(f"{name}'s birthday is in {days_until_birthday} days on {birthday_date.strftime('%B %d')}")
-            elif birthday_date.month == today.month + 1 and today.day > birthday_date.day:
-                days_until_birthday = (datetime.date(today.year, birthday_date.month, birthday_date.day) - today).days
-                print(f"{name}'s birthday is in {days_until_birthday} days on {birthday_date.strftime('%B %d')}")
-            elif birthday_date.month == 1 and today.month == 12 and today.day > birthday_date.day:
-                days_until_birthday = (datetime.date(today.year + 1, birthday_date.month, birthday_date.day) - today).days
-                print(f"{name}'s birthday is in {days_until_birthday} days on {birthday_date.strftime('%B %d')}")
-            else:
-                next_birthday_year = today.year + 1 if today.month > birthday_date.month else today.year
-                days_until_birthday = (datetime.date(next_birthday_year, birthday_date.month, birthday_date.day) - today).days
-                print(f"{name}'s birthday is in {days_until_birthday} days on {birthday_date.strftime('%B %d')}")
+            print(f"{name}: {birthday}")
 
 def main():
     while True:
         print("\n1. Add a birthday")
-        print("2. Check birthdays")
-        print("3. Exit")
+        print("2. Delete a birthday")
+        print("3. Edit a birthday")
+        print("4. Display all birthdays")
+        print("5. Exit")
         choice = input("Enter your choice: ")
 
         if choice == "1":
             add_birthday()
         elif choice == "2":
-            check_birthdays()
+            delete_birthday()
         elif choice == "3":
+            edit_birthday()
+        elif choice == "4":
+            display_birthdays()
+        elif choice == "5":
             print("Exiting...")
             break
         else:
             print("Invalid choice. Please try again.")
+
 
 if __name__ == "__main__":
     main()
