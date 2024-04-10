@@ -41,11 +41,15 @@ def edit_birthday():
 
 
 def display_birthdays():
+    print("\nBirthdays:")
     with open("birthdays.txt", "r") as file:
-        print("\nBirthdays:")
         for line in file:
-            name, birthday = line.strip().split(",")
-            print(f"{name}: {birthday}")
+            # Split the line into name and birthday using comma as the delimiter
+            parts = line.strip().split(",")
+            if len(parts) == 2:  # Check if the line contains both name and birthday
+                name, birthday = parts
+                print(f"{name}: {birthday}")
+
 
 def main():
     while True:
