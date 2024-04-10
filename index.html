@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Birthday Reminder</title>
+</head>
+<body>
+    <h1>Birthday Reminder</h1>
+
+    <h2>Add a Birthday</h2>
+    <form id="addForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        <label for="birthdate">Birthdate:</label>
+        <input type="date" id="birthdate" name="birthdate" required>
+        <button type="submit">Add Birthday</button>
+    </form>
+
+    <h2>Display Birthdays</h2>
+    <ul id="birthdayList"></ul>
+
+    <script>
+        // Load existing data from Local Storage when the page loads
+        window.onload = function() {
+            loadBirthdays();
+        };
+
+        // Function to load birthdays from Local Storage
+        function loadBirthdays() {
+            const birthdays = JSON.parse(localStorage.getItem("birthdays")) || {};
+            displayBirthdays(birthdays);
+        }
+
+        // Function to save birthdays to Local Storage
+        function saveBirthdays(birthdays) {
+            localStorage.setItem("birthdays", JSON.stringify(birthdays));
+        }
+
+        // Function to display birthdays
+        function displayBirthdays(birthdays) {
+            const birthdayList = document.getElementById("birthdayList");
+            birthdayList.innerHTML = ""; // Clear previous list
+            for (const [name, birthdate] of Object.entries(birthdays)) {
+                const listItem = document.createElement("li");
+                const remainingDays = calculateRemainingDays(birthdate);
+                listItem.textContent = `${name}: ${birthdate} (in ${remainingDays} days)`;
+                birthdayList.appendChild(listItem);
+            }
+        }
+
+        // Function to calculate remaining days until birthday
+        function calculateRemainingDays(birthdate) {
+            const today = new Date();
+            const birthDate = new Date(birthdate);
+            birthDate.setFullYear(today.getFullYear()); // Set the birth year to the current year
+            if (birthDate < today) {
+                birthDate.setFullYear(today.getFullYear() + 1); // If birthday has already passed this year, set it to next year
+            }
+            const diffTime = Math.abs(birthDate - today);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // Function to handle form submission
+        document.getElementById("addForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent the form from submitting normally
+            const name = document.getElementById("name").value;
+            const birthdate = document.getElementById("birthdate").value;
+            const birthdays = JSON.parse(localStorage.getItem("birthdays")) || {};
+            birthdays[name] = birthdate;
+            saveBirthdays(birthdays);
+            loadBirthdays(); // Reload birthdays after adding
+            this.reset(); // Reset the form
+        });
+    </script>
+</body>
+</html>
