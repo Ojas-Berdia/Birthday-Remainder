@@ -1,79 +1,78 @@
 import datetime
+from plyer import notification
 
+# Function to add a birthday
+def add_birthday(name, birthdate, birthdays):
+    birthdays[name] = birthdate
 
-def add_birthday():
-    name = input("Enter friend's name: ")
-    birthday = input("Enter friend's birthday (YYYY-MM-DD): ")
-    with open("birthdays.txt", "a") as file:
-        file.write(name + "," + birthday + "\n")
+# Function to remove a birthday
+def remove_birthday(name, birthdays):
+    if name in birthdays:
+        del birthdays[name]
+        print(f"{name}'s birthday has been removed from the list.")
+    else:
+        print(f"{name} is not found in the birthday list.")
 
-
-def delete_birthday():
-    name_to_delete = input("Enter the name of the friend whose birthday you want to delete: ")
-    with open("birthdays.txt", "r") as file:
-        lines = file.readlines()
-    with open("birthdays.txt", "w") as file:
-        for line in lines:
-            name, _ = line.strip().split(",")
-            if name != name_to_delete:
-                file.write(line)
-    print(f"{name_to_delete}'s birthday has been deleted.")
-
-
-def edit_birthday():
-    name_to_edit = input("Enter the name of the friend whose birthday you want to edit: ")
-    new_name = input("Enter the new name (leave blank to keep the same): ")
-    new_birthday = input("Enter the new birthday (YYYY-MM-DD) (leave blank to keep the same): ")
-    with open("birthdays.txt", "r") as file:
-        lines = file.readlines()
-    with open("birthdays.txt", "w") as file:
-        for line in lines:
-            name, birthday = line.strip().split(",")
-            if name == name_to_edit:
-                if new_name:
-                    name = new_name
-                if new_birthday:
-                    birthday = new_birthday
-                file.write(name + "," + birthday + "\n")
-            else:
-                file.write(line)
-    print(f"{name_to_edit}'s birthday has been updated.")
-
-
-def display_birthdays():
+# Function to display all birthdays
+def display_birthdays(birthdays):
     print("\nBirthdays:")
-    with open("birthdays.txt", "r") as file:
-        for line in file:
-            # Split the line into name and birthday using comma as the delimiter
-            parts = line.strip().split(",")
-            if len(parts) == 2:  # Check if the line contains both name and birthday
-                name, birthday = parts
-                print(f"{name}: {birthday}")
+    for name, birthdate in birthdays.items():
+        print(f"{name}: {birthdate}")
 
+# Function to check and display upcoming birthdays with remaining days
+def check_upcoming_birthdays(birthdays):
+    today = datetime.date.today()
+    upcoming_birthdays = {}
+    for name, birthdate in birthdays.items():
+        birthdate = datetime.datetime.strptime(birthdate, "%Y-%m-%d").date()
+        birthdate_this_year = birthdate.replace(year=today.year)
+        if birthdate_this_year < today:
+            birthdate_this_year = birthdate_this_year.replace(year=today.year + 1)
+        days_remaining = (birthdate_this_year - today).days
+        upcoming_birthdays[name] = (birthdate_this_year.strftime("%Y-%m-%d"), days_remaining)
+    if upcoming_birthdays:
+        print("\nUpcoming Birthdays with Remaining Days:")
+        for name, (birthdate, days_remaining) in upcoming_birthdays.items():
+            print(f"{name}: {birthdate} (in {days_remaining} days)")
+            if days_remaining == 0:
+                notification_title = "Birthday Reminder"
+                notification_message = f"Today is {name}'s birthday!"
+                notification.notify(
+                    title=notification_title,
+                    message=notification_message,
+                    app_name="Birthday Reminder",
+                    timeout=10
+                )
+    else:
+        print("\nNo upcoming birthdays.")
 
+# Main function
 def main():
+    birthdays = {}
     while True:
         print("\n1. Add a birthday")
-        print("2. Delete a birthday")
-        print("3. Edit a birthday")
-        print("4. Display all birthdays")
+        print("2. Remove a birthday")
+        print("3. Display all birthdays")
+        print("4. Check upcoming birthdays")
         print("5. Exit")
         choice = input("Enter your choice: ")
 
-        if choice == "1":
-            add_birthday()
-        elif choice == "2":
-            delete_birthday()
-        elif choice == "3":
-            edit_birthday()
-        elif choice == "4":
-            display_birthdays()
-        elif choice == "5":
+        if choice == '1':
+            name = input("Enter friend's name: ")
+            birthdate = input("Enter friend's birthday (YYYY-MM-DD): ")
+            add_birthday(name, birthdate, birthdays)
+        elif choice == '2':
+            name = input("Enter friend's name to remove: ")
+            remove_birthday(name, birthdays)
+        elif choice == '3':
+            display_birthdays(birthdays)
+        elif choice == '4':
+            check_upcoming_birthdays(birthdays)
+        elif choice == '5':
             print("Exiting...")
             break
         else:
-            print("Invalid choice. Please try again.")
-
+            print("Invalid choice. Please choose a valid option.")
 
 if __name__ == "__main__":
     main()
